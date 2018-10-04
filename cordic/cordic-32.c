@@ -29,3 +29,16 @@ void cordic(int theta, int *s, int *c, int n)
   }  
  *c = x; *s = y;
 }
+
+double cordic_cos(double f)
+{
+	int s,c; 
+	cordic((int)(f * MUL), &s, &c, 32);
+	return c/MUL;
+}
+double cordic_sin(double f)
+{
+	int s,c; 
+	cordic((int)(f * MUL), &s, &c, 32);
+	return s/MUL;
+}
