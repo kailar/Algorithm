@@ -35,7 +35,6 @@ int knapsack_solv(knapsack_solv_func func)
 		if(p.b[i]){ sumv+=p.v[i];sumw+=p.w[i];}
 		printf("%4d w[%2d] v[%2d] %c\r\n",i,p.w[i],p.v[i],p.b[i]?'+':' ');
 	}
-	
-	printf("cost time[%dMs],retv=%d values=%d weight=%d/%d\r\n",t,retv,sumv,sumw,p.maxw);
+	printf("sumw=%d/%d sumv=%d retv=%d time=%dMs\r\n",sumw,p.maxw,sumv,retv,t);
 	return sumv;
 }
