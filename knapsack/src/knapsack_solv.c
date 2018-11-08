@@ -5,65 +5,34 @@ static int maxv(int a,int b)
 {
 	return a>b?a:b;
 }
-static int _knapsack_solv_recursive(KNAPSACK_PROBLEM *p,int i,int w)
+static int _knapsack_solv_recursive_bestv=0;
+static void _knapsack_solv_recursive(KNAPSACK_PROBLEM *p,int i,int sumw,int sumv)
 {
-	if(i==p->len-1)
+	if(i==p->len)
 	{
-		if(p->w[i]<=w) 
+		if(sumv>_knapsack_solv_recursive_bestv)
 		{
-			p->b[i]=1;
-			return p->v[i];
-		}
-		else
-		{
-			p->b[i]=0;
-			return 0;
+			_knapsack_solv_recursive_bestv=sumv;
+			memcpy(p->buf,p->b,p->len*sizeof(int));
 		}
 	}
 	else
 	{
-
-		 if(p->w[i]>w)
-	    {   
-			int v0=_knapsack_solv_recursive(p,i+1,w);
-			p->b[i]=0;
-			return v0;
-		}
-		else if(p->w[i]==w)
+		p->b[i]=0;
+		_knapsack_solv_recursive(p,i+1,sumw,sumv);
+		if(sumw>=p->w[i])
 		{
-			memset(p->b+i,0,(p->len-i)*sizeof(int));
 			p->b[i]=1;
-			return p->v[i];
-		}
-		else
-		{
-			int v0,v1,v;
-			int* buf=(int*)malloc(sizeof(int)*p->len);
-			v0=_knapsack_solv_recursive(p,i+1,w);
-			memcpy(buf+i,p->b+i,(p->len-i)*sizeof(int));
-			v1=_knapsack_solv_recursive(p,i+1,w-p->w[i])+p->v[i];
-			//if(i==1) printf("i=%d v0=%d v1=%d w=%d\r\n",i,v0,v1,w);
-			if(v0>v1) /*select v0*/
-			{
-				//_knapsack_solv_recursive(p,i+1,w);
-				memcpy(p->b+i,buf+i,(p->len-i)*sizeof(int));
-				p->b[i]=0;
-				v=v0;
-			}
-			else
-			{
-				p->b[i]=1;
-				v=v1;
-			}
-			free(buf);
-			return v;
+			_knapsack_solv_recursive(p,i+1,sumw-p->w[i],sumv+p->v[i]);
 		}
 	}
 }
 
 int knapsack_solv_recursive(KNAPSACK_PROBLEM *p)
 {
-	return _knapsack_solv_recursive(p,0,p->maxw);
+	_knapsack_solv_recursive(p,0,p->maxw,0);
+	memcpy(p->b,p->buf,p->len*sizeof(int));
+	return _knapsack_solv_recursive_bestv;
 }
 
 int knapsack_solv_dynamic(KNAPSACK_PROBLEM *p)
