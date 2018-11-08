@@ -34,7 +34,7 @@ int knapsack_solv_recursive(KNAPSACK_PROBLEM *p)
 	memcpy(p->b,p->buf,p->len*sizeof(int));
 	return _knapsack_solv_recursive_bestv;
 }
-
+//使用二维数组可以求得最优解与最优序列
 int knapsack_solv_dynamic(KNAPSACK_PROBLEM *p)
 {
 	int*  buf=(int*)malloc(p->len*(p->maxw+1)*sizeof(int));
@@ -60,10 +60,38 @@ int knapsack_solv_dynamic(KNAPSACK_PROBLEM *p)
 	return w;
 }
 
+//使用一维数组只能求得最优解,不能得到最优序列,性能是knapsack_solv_dynamic的4倍左右
+/*
+态转移方程 c[i][j] = max{c[i-1][j], c[i-1][j-w[i]]+v[i]}
+每一次c[i][j]改变的值只与c[i-1][x] {x:1...j}有关c[i-1][x]是前一次i循环保存下来的值，因此，可以将c缩减成一维数组
+状态转移方程转换为 c[j] = max(c[j], c[j-w[i]]+v[i]);
+*/
+int knapsack_solv_dynamic_dim1(KNAPSACK_PROBLEM *p)
+{
+	int*  c=(int*)calloc(p->maxw+1,sizeof(int));//c[j]在i轮计算后表示在容重为j时装入前i个物品，所能获取的最做优值
+	int i,j,w;
+	for(i=0;i<p->len;i++)
+		for(j=p->maxw;j>=p->w[i];j--)
+	{
+		/*
+		a[j]计算时依赖a[j-p->w[i]]的值，a[j-p->w[i]]的值必须是i-1这轮循环的计算结果，否则无法完成递推
+		如果j从0到p->maxw（正序），在取a[j-p->w[i]]的值时，它可能已经在本轮循环修改了，因为j-p->w[i]<j,循环时a[j-p->w[i]]会先修改
+		所以，j在循环时要从p->maxw到0（倒序）
+		*/
+		 if(c[j]<=p->v[i]+c[j-p->w[i]])
+		 {
+			 c[j]=p->v[i]+c[j-p->w[i]];
+		 }
+	}
+	w=c[p->maxw];
+	free(c);
+	return w;
+}
 
 int knapsack_test()
 {
 	//return knapsack_solv(knapsack_solv_recursive);
-	return knapsack_solv(knapsack_solv_dynamic);
+	//return knapsack_solv(knapsack_solv_dynamic);
+	return knapsack_solv(knapsack_solv_dynamic_dim1);
 
 }
